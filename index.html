@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>meeting prep :3</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #b66fff;
+    --accent2: #ff6bba;
+    --accent3: #6bffdc;
+    --text: #e8e8f0;
+    --muted: #666680;
+    --green: #6bffb0;
+    --yellow: #ffe06b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    line-height: 1.6;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(182,111,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(107,255,220,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.75rem;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin-bottom: 2.5rem;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+  }
+
+  .card-body {
+    font-size: 0.875rem;
+    color: #a0a0b8;
+    line-height: 1.65;
+  }
+
+  .card-body strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* ACCENT CARDS */
+  .card.green { border-color: rgba(107,255,176,0.2); }
+  .card.green .card-title { color: var(--green); }
+  .card.green::before { background: linear-gradient(90deg, var(--green), #6bffdc); }
+
+  .card.purple { border-color: rgba(182,111,255,0.2); }
+  .card.purple .card-title { color: var(--accent); }
+
+  .card.pink { border-color: rgba(255,107,186,0.2); }
+  .card.pink .card-title { color: var(--accent2); }
+
+  .card.yellow { border-color: rgba(255,224,107,0.2); }
+  .card.yellow .card-title { color: var(--yellow); }
+
+  /* QUESTIONS */
+  .question-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .q-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.1em;
+  }
+
+  .q-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .q-why {
+    font-size: 0.8rem;
+    color: #888899;
+    line-height: 1.55;
+  }
+
+  .q-why strong { color: #aaaacc; }
+
+  /* SIGNALS */
+  .signal {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.6rem;
+  }
+
+  .signal-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 0.35rem;
+    flex-shrink: 0;
+  }
+
+  .signal-dot.good { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .signal-dot.bad { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+
+  .signal-text {
+    font-size: 0.85rem;
+    color: #a0a0b8;
+    line-height: 1.55;
+  }
+
+  .signal-text strong { color: var(--text); }
+
+  /* ENDGAME */
+  .endgame {
+    background: linear-gradient(135deg, rgba(182,111,255,0.08), rgba(107,255,220,0.05));
+    border: 1px solid rgba(182,111,255,0.25);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+
+  .endgame p {
+    font-size: 0.875rem;
+    color: #a0a0b8;
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+  }
+
+  .endgame p:last-child { margin-bottom: 0; }
+
+  .endgame strong { color: var(--text); }
+
+  .endgame .highlight {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* MINDSET BOX */
+  .mindset {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .mindset p {
+    font-size: 0.875rem;
+    color: #a0a0b8;
+    line-height: 1.65;
+  }
+
+  .mindset strong { color: var(--text); }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .footer p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .footer .big {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <span class="tag">meeting prep // james kang @ night</span>
+    <h1>tonight at <span>6:15pm</span></h1>
+    <p class="subtitle">// read this an hour before. you already know what you need to know.</p>
+  </div>
+
+  <!-- WHO YOU'RE MEETING -->
+  <div class="section">
+    <div class="section-label">who he is</div>
+    <div class="card green">
+      <div class="card-title">James Kang — Coordinator @ Night</div>
+      <div class="card-body">
+        Been at Night since April 2025. USC-trained filmmaker and digital strategist. His personal project is called <strong>Noonchimes</strong> — that's why the Instagram came from a personal-looking account. He's <strong>not</strong> a senior manager, but he's genuinely employed at Night and has access to their brand deal pipeline. Cherdleys and Richard following him checks out. This is real.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">what this actually means</div>
+      <div class="card-body">
+        Night is a massive company — junior coordinators are how they find and onboard emerging talent before it goes up the chain. James identifying you early and being right about you is how <strong>his</strong> career at Night grows too. Your interests are aligned. He wants this to work as much as you do.
+      </div>
+    </div>
+  </div>
+
+  <!-- WHAT'S ON THE TABLE -->
+  <div class="section">
+    <div class="section-label">what's being offered</div>
+    <div class="card purple">
+      <div class="card-title">Rainbet deals — 7k per video</div>
+      <div class="card-body">
+        Confirmed rate from a third party. These are real and flowable through Night's existing Rainbet relationship. The "unlimited" framing was hype but 1-2 a month is realistic. <strong>This is the immediate money.</strong> The content fits your aesthetic better than people think — lifestyle/alt read, not a slot machine ad.
+      </div>
+    </div>
+    <div class="card purple">
+      <div class="card-title">Hot Topic — one day</div>
+      <div class="card-body">
+        Hot Topic has two tiers: a self-serve affiliate program (10% commission, anyone can join) and <strong>proper paid brand deals</strong> that are negotiated directly. If James is promising Hot Topic, you want to know which one. A real paid deal with them is genuinely exciting for your world.
+      </div>
+    </div>
+    <div class="card purple">
+      <div class="card-title">4th Wall deal — already submitted</div>
+      <div class="card-body">
+        He submitted you into a deal before you agreed to anything. Ask to see the terms — frame it as excitement, not suspicion. <strong>"I'd love to know what that looks like"</strong> is enough.
+      </div>
+    </div>
+    <div class="card purple">
+      <div class="card-title">Creator network + content strategist</div>
+      <div class="card-body">
+        The Discord with established creators is likely Night's internal creator network. The content strategist is probably someone on Night's team. Both are real perks if this goes through — ask what that support actually looks like day to day.
+      </div>
+    </div>
+  </div>
+
+  <!-- QUESTIONS TO ASK -->
+  <div class="section">
+    <div class="section-label">questions to work in naturally</div>
+
+    <div class="question-block">
+      <div class="q-number">01 — most important</div>
+      <div class="q-text">"Is this something you're doing through Night officially, or more your Noonchimes project?"</div>
+      <div class="q-why">You already know the answer is probably both — but <strong>his answer tells you what he's comfortable claiming</strong>. Honest answer = trustworthy. Overclaim = slow down.</div>
+    </div>
+
+    <div class="question-block">
+      <div class="q-number">02</div>
+      <div class="q-text">"What does the split look like on brand deals you bring in?"</div>
+      <div class="q-why">Standard is <strong>15–20%</strong>. Anything above 25% is unusual. Asking this is completely normal and professional — it won't scare him off.</div>
+    </div>
+
+    <div class="question-block">
+      <div class="q-number">03</div>
+      <div class="q-text">"The 4th Wall thing — I'd love to see what the terms look like before anything's signed."</div>
+      <div class="q-why">He acted before you agreed to anything. <strong>Seeing paperwork is always your right.</strong> Frame it as being thorough, not distrustful.</div>
+    </div>
+
+    <div class="question-block">
+      <div class="q-number">04</div>
+      <div class="q-text">"When you mention Hot Topic — is that a paid partnership or the affiliate program?"</div>
+      <div class="q-why">This immediately shows whether he knows the difference. <strong>If he knows, good sign. If he doesn't, recalibrate expectations on that specific promise.</strong></div>
+    </div>
+
+    <div class="question-block">
+      <div class="q-number">05</div>
+      <div class="q-text">"What does the first 90 days actually look like practically?"</div>
+      <div class="q-why">Grounds the hype in reality. <strong>A good answer is specific</strong> — deals, timelines, who you're talking to. A bad answer is vague vibes.</div>
+    </div>
+
+  </div>
+
+  <!-- SIGNALS TO LISTEN FOR -->
+  <div class="section">
+    <div class="section-label">listen for these</div>
+
+    <div class="signal">
+      <div class="signal-dot good"></div>
+      <div class="signal-text"><strong>Good:</strong> He's specific about timelines, names actual contacts at brands, mentions other creators at your scale he's currently working with.</div>
+    </div>
+    <div class="signal">
+      <div class="signal-dot good"></div>
+      <div class="signal-text"><strong>Good:</strong> He's honest that he's a coordinator, not a senior manager — and frames it as "I'm building this out" rather than overclaiming authority.</div>
+    </div>
+    <div class="signal">
+      <div class="signal-dot good"></div>
+      <div class="signal-text"><strong>Good:</strong> He asks about your content, your goals, what you want — not just what he can sell. A manager who only pitches isn't really managing.</div>
+    </div>
+    <div class="signal">
+      <div class="signal-dot bad"></div>
+      <div class="signal-text"><strong>Watch for:</strong> Pressure to sign or agree to something <strong>tonight</strong>. Legitimate deals have paperwork that takes days. Nothing real requires a same-night commitment.</div>
+    </div>
+    <div class="signal">
+      <div class="signal-dot bad"></div>
+      <div class="signal-text"><strong>Watch for:</strong> Vagueness on the 4th Wall terms or resistance to showing you the contract. You have every right to read anything before it represents you.</div>
+    </div>
+    <div class="signal">
+      <div class="signal-dot bad"></div>
+      <div class="signal-text"><strong>Watch for:</strong> He can only name Johnnie Guilbert when asked about his roster. One name at a completely different scale isn't a track record with smaller creators.</div>
+    </div>
+  </div>
+
+  <!-- HOW TO END THE CALL -->
+  <div class="section">
+    <div class="section-label">how to end it</div>
+    <div class="endgame">
+      <p>Be <span class="highlight">genuinely enthusiastic</span> — because you are, and that's real. Don't play it cool. He already knows you're excited and that's not a weakness.</p>
+      <p>Do <strong>not</strong> agree to anything in writing tonight, even if everything goes perfectly. The right thing to say is: <span class="highlight">"This all sounds incredible, I just want to look over everything properly before I sign anything — can you send it over?"</span> That's professional, not hesitant.</p>
+      <p>If Swole is on the call, let him anchor the practical questions so you can stay in the energy. You're the creative, he's the gut-check. That dynamic is actually useful here.</p>
+    </div>
+  </div>
+
+  <!-- MINDSET -->
+  <div class="section">
+    <div class="section-label">going in</div>
+    <div class="mindset">
+      <p>You're not auditioning. <strong>He came to you.</strong> He DM'd you, he's been tracking your content, he already submitted you into a deal. You're not convincing him of anything — you're deciding whether <em>he's</em> the right person to work with.</p>
+    </div>
+    <div class="mindset">
+      <p>The Rainbet stuff is the smallest part of what's being offered. <strong>The real value is the network, the collabs, and having Night's infrastructure behind your music.</strong> Keep that in mind if the gambling conversation feels weird — it's a means to a bigger end.</p>
+    </div>
+    <div class="mindset">
+      <p>James being junior is actually fine. <strong>Junior people at good companies hustle harder</strong> and advocate louder for their clients because their reputation depends on it. If he's right about you, you both win.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span class="big">:3</span>
+    <p>you got this // good luck tonight</p>
+  </div>
+
+</div>
+</body>
+</html>

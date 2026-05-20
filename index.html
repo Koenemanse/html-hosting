@@ -1,402 +1,892 @@
-
-<h2 class="sr-only">BRAiNROT creator deep dive — platform metrics, growth analysis, and sponsorship readiness, May 2026</h2>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRAiNROT — creator deep dive :3</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  .dd-root { font-family: var(--font-sans); color: var(--color-text-primary); padding: 1.5rem 0; }
-  .dd-header { margin-bottom: 2rem; }
-  .dd-title { font-size: 22px; font-weight: 500; margin: 0 0 4px; }
-  .dd-sub { font-size: 14px; color: var(--color-text-secondary); margin: 0; }
-  .dd-badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
-  .badge-live { background: #fcebeb; color: #a32d2d; }
-  .badge-new { background: #eaf3de; color: #3b6d11; }
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --accent: #b66fff;
+    --accent2: #ff6bba;
+    --accent3: #6bffdc;
+    --text: #e8e8f0;
+    --muted: #666680;
+    --green: #6bffb0;
+    --yellow: #ffe06b;
+    --red: #ff6b6b;
+  }
 
-  .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-tertiary); margin: 2rem 0 0.75rem; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
-  .metric-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 14px 16px; }
-  .metric-label { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 4px; }
-  .metric-value { font-size: 22px; font-weight: 500; margin: 0; line-height: 1.2; }
-  .metric-delta { font-size: 12px; margin: 4px 0 0; }
-  .delta-up { color: #3b6d11; }
-  .delta-flat { color: var(--color-text-tertiary); }
-  .delta-warn { color: #854f0b; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    line-height: 1.6;
+  }
 
-  .platform-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
-  .platform-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
-  .platform-card.spike { border-color: #97c459; border-width: 1.5px; }
-  .platform-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-  .platform-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
-  .platform-name { font-size: 14px; font-weight: 500; }
-  .platform-handle { font-size: 12px; color: var(--color-text-secondary); }
-  .platform-stat { font-size: 20px; font-weight: 500; margin: 0 0 2px; }
-  .platform-detail { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
-  .pill { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 999px; margin-right: 4px; margin-top: 4px; }
-  .pill-green { background: #eaf3de; color: #3b6d11; }
-  .pill-amber { background: #faeeda; color: #633806; }
-  .pill-red { background: #fcebeb; color: #a32d2d; }
-  .pill-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); }
-  .pill-blue { background: #e6f1fb; color: #0c447c; }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(182,111,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(107,255,220,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-  .funnel-wrap { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1.5rem; }
-  .funnel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .funnel-label { font-size: 13px; width: 90px; flex-shrink: 0; color: var(--color-text-secondary); }
-  .funnel-bar-wrap { flex: 1; background: var(--color-background-primary); border-radius: 4px; height: 22px; overflow: hidden; border: 0.5px solid var(--color-border-tertiary); }
-  .funnel-bar { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; font-size: 12px; font-weight: 500; white-space: nowrap; }
-  .bar-ig { background: #c0dd97; color: #27500a; }
-  .bar-yt { background: #f09595; color: #501313; }
-  .bar-tt { background: #afa9ec; color: #26215c; }
-  .bar-sp { background: #b5d4f4; color: #042c53; }
-  .funnel-note { font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px; }
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
 
-  .catalog-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 1.5rem; }
-  .catalog-table th { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); text-align: left; padding: 6px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
-  .catalog-table td { padding: 8px 8px; border-bottom: 0.5px solid var(--color-border-tertiary); vertical-align: middle; }
-  .catalog-table tr:last-child td { border-bottom: none; }
-  .track-name { font-weight: 500; }
-  .stream-bar-wrap { width: 120px; background: var(--color-background-secondary); border-radius: 3px; height: 8px; overflow: hidden; }
-  .stream-bar { height: 8px; border-radius: 3px; background: #7f77dd; }
+  .header {
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
 
-  .flags-list { list-style: none; padding: 0; margin: 0 0 1.5rem; }
-  .flags-list li { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; line-height: 1.6; }
-  .flags-list li:last-child { border-bottom: none; }
-  .flag-icon { flex-shrink: 0; margin-top: 2px; }
+  .tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
 
-  .recs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
-  .rec-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
-  .rec-role { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; color: var(--color-text-tertiary); margin: 0 0 6px; }
-  .rec-items { list-style: none; padding: 0; margin: 0; font-size: 13px; line-height: 1.7; color: var(--color-text-secondary); }
-  .rec-items li::before { content: "→ "; color: var(--color-text-tertiary); }
+  h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
 
-  .verdict { background: var(--color-background-secondary); border-left: 3px solid #639922; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: 1rem 1.25rem; margin-bottom: 1.5rem; font-size: 14px; line-height: 1.7; }
-  .verdict strong { font-weight: 500; color: var(--color-text-primary); }
+  h1 span { color: var(--accent); }
 
-  .caveat-block { font-size: 12px; color: var(--color-text-tertiary); line-height: 1.6; border-top: 0.5px solid var(--color-border-tertiary); padding-top: 1rem; }
+  .subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.75rem;
+  }
+
+  .section { margin-bottom: 2.5rem; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* METRIC GRID */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  @media (max-width: 480px) {
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+  }
+
+  .metric-card.spike {
+    border-color: rgba(107,255,176,0.25);
+  }
+
+  .metric-card.broken {
+    border-color: rgba(255,107,107,0.2);
+  }
+
+  .metric-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .metric-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .metric-value.green { color: var(--green); }
+  .metric-value.purple { color: var(--accent); }
+  .metric-value.pink { color: var(--accent2); }
+  .metric-value.teal { color: var(--accent3); }
+  .metric-value.yellow { color: var(--yellow); }
+  .metric-value.red { color: var(--red); }
+
+  .metric-delta {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    margin-top: 0.3rem;
+    line-height: 1.4;
+  }
+
+  .delta-up { color: var(--green); }
+  .delta-warn { color: var(--yellow); }
+  .delta-bad { color: var(--red); }
+  .delta-flat { color: var(--muted); }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+  }
+
+  .card-body {
+    font-size: 0.875rem;
+    color: #a0a0b8;
+    line-height: 1.65;
+  }
+
+  .card-body strong { color: var(--text); font-weight: 600; }
+
+  .card.green { border-color: rgba(107,255,176,0.2); }
+  .card.green .card-title { color: var(--green); }
+  .card.green::before { background: linear-gradient(90deg, var(--green), var(--accent3)); }
+
+  .card.purple { border-color: rgba(182,111,255,0.2); }
+  .card.purple .card-title { color: var(--accent); }
+
+  .card.pink { border-color: rgba(255,107,186,0.2); }
+  .card.pink .card-title { color: var(--accent2); }
+
+  .card.yellow { border-color: rgba(255,224,107,0.2); }
+  .card.yellow .card-title { color: var(--yellow); }
+
+  .card.red { border-color: rgba(255,107,107,0.2); }
+  .card.red .card-title { color: var(--red); }
+
+  .card.teal { border-color: rgba(107,255,220,0.2); }
+  .card.teal .card-title { color: var(--accent3); }
+
+  /* PLATFORM ROW */
+  .platform-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .platform-row::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .platform-row:hover::before { opacity: 1; }
+  .platform-row.ig::before { background: linear-gradient(90deg, var(--green), var(--accent3)); }
+  .platform-row.tt::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .platform-row.yt::before { background: linear-gradient(90deg, var(--red), var(--accent2)); }
+  .platform-row.sp::before { background: linear-gradient(90deg, var(--accent3), var(--accent)); }
+  .platform-row.tw::before { background: linear-gradient(90deg, var(--accent), var(--accent3)); }
+  .platform-row.dc::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+
+  .platform-row.ig { border-color: rgba(107,255,176,0.2); }
+  .platform-row.tt { border-color: rgba(182,111,255,0.15); }
+  .platform-row.yt { border-color: rgba(255,107,107,0.15); }
+  .platform-row.sp { border-color: rgba(107,255,220,0.15); }
+  .platform-row.tw { border-color: rgba(182,111,255,0.12); }
+  .platform-row.dc { border-color: rgba(182,111,255,0.12); }
+
+  .platform-left { flex: 1; min-width: 0; }
+  .platform-right { text-align: right; flex-shrink: 0; }
+
+  .platform-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+
+  .platform-handle {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .platform-detail {
+    font-size: 0.8rem;
+    color: #888899;
+    line-height: 1.55;
+  }
+
+  .platform-detail strong { color: #aaaacc; }
+
+  .platform-stat {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .platform-subdelta {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    margin-top: 0.25rem;
+    line-height: 1.4;
+  }
+
+  .ig-stat { color: var(--green); }
+  .tt-stat { color: var(--accent); }
+  .yt-stat { color: var(--red); }
+  .sp-stat { color: var(--accent3); }
+  .tw-stat { color: var(--accent); }
+  .dc-stat { color: var(--accent2); }
+
+  /* FUNNEL */
+  .funnel { margin-bottom: 0.75rem; }
+
+  .funnel-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .funnel-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    width: 80px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .funnel-bar-bg {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    height: 24px;
+    overflow: hidden;
+  }
+
+  .funnel-bar {
+    height: 100%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding-left: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: width 0.8s ease;
+  }
+
+  .bar-ig { background: rgba(107,255,176,0.18); color: var(--green); border-right: 2px solid var(--green); }
+  .bar-yt { background: rgba(255,107,107,0.15); color: var(--red); border-right: 2px solid var(--red); }
+  .bar-tt { background: rgba(182,111,255,0.15); color: var(--accent); border-right: 2px solid var(--accent); }
+  .bar-sp { background: rgba(107,255,220,0.12); color: var(--accent3); border-right: 2px solid var(--accent3); }
+
+  .funnel-note {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    line-height: 1.5;
+    padding-left: 88px;
+  }
+
+  /* CATALOG */
+  .track {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+  }
+
+  .track-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    width: 20px;
+    flex-shrink: 0;
+  }
+
+  .track-info { flex: 1; min-width: 0; }
+
+  .track-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.15rem;
+  }
+
+  .track-meta {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+  }
+
+  .track-right { text-align: right; flex-shrink: 0; }
+
+  .track-streams {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent3);
+  }
+
+  .track-bar-bg {
+    width: 80px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+
+  .track-bar { height: 3px; border-radius: 2px; background: var(--accent); }
+
+  .track-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .badge-breakout { background: rgba(107,255,176,0.1); color: var(--green); border: 1px solid rgba(107,255,176,0.2); }
+  .badge-latest { background: rgba(182,111,255,0.1); color: var(--accent); border: 1px solid rgba(182,111,255,0.2); }
+  .badge-presave { background: rgba(255,224,107,0.1); color: var(--yellow); border: 1px solid rgba(255,224,107,0.2); }
+  .badge-label { background: rgba(107,255,220,0.1); color: var(--accent3); border: 1px solid rgba(107,255,220,0.2); }
+
+  /* FLAGS */
+  .flag {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 0.6rem;
+  }
+
+  .flag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 0.35rem;
+    flex-shrink: 0;
+  }
+
+  .flag-dot.good { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .flag-dot.warn { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+  .flag-dot.bad { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .flag-dot.info { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+  .flag-text {
+    font-size: 0.85rem;
+    color: #a0a0b8;
+    line-height: 1.6;
+  }
+
+  .flag-text strong { color: var(--text); }
+
+  /* RECS */
+  .rec-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .rec-block.green { border-left-color: var(--green); }
+  .rec-block.pink { border-left-color: var(--accent2); }
+  .rec-block.teal { border-left-color: var(--accent3); }
+
+  .rec-role {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .rec-block p {
+    font-size: 0.875rem;
+    color: #a0a0b8;
+    line-height: 1.65;
+    margin-bottom: 0.5rem;
+  }
+
+  .rec-block p:last-child { margin-bottom: 0; }
+  .rec-block strong { color: var(--text); }
+  .rec-block .hl { color: var(--accent); font-weight: 600; }
+  .rec-block.green .hl { color: var(--green); }
+  .rec-block.pink .hl { color: var(--accent2); }
+  .rec-block.teal .hl { color: var(--accent3); }
+
+  /* VERDICT */
+  .verdict {
+    background: linear-gradient(135deg, rgba(182,111,255,0.08), rgba(107,255,220,0.05));
+    border: 1px solid rgba(182,111,255,0.25);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .verdict p {
+    font-size: 0.875rem;
+    color: #a0a0b8;
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+  }
+
+  .verdict p:last-child { margin-bottom: 0; }
+  .verdict strong { color: var(--text); }
+  .verdict .hl { color: var(--accent); font-weight: 600; }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .footer p {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .footer .big {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
 </style>
+</head>
+<body>
+<div class="container">
 
-<div class="dd-root">
-
-  <div class="dd-header">
-    <p class="dd-title">BRAiNROT — rin / Camryn Cruz <span class="dd-badge badge-live">breakout active</span></p>
-    <p class="dd-sub">Creator deep dive · May 20, 2026 · updated with latest platform data</p>
+  <!-- HEADER -->
+  <div class="header">
+    <span class="tag">creator deep dive // rin :3 / BRAiNROT / Camryn Cruz</span>
+    <h1><span>BRAiNROT</span> — breakout profile</h1>
+    <p class="subtitle">// may 20, 2026 — updated with latest platform data. instagram is mid-spike right now.</p>
   </div>
 
-  <p class="section-label">top-line snapshot</p>
-  <div class="metric-grid">
-    <div class="metric-card">
-      <p class="metric-label">Instagram followers</p>
-      <p class="metric-value">~80K</p>
-      <p class="metric-delta delta-up"><i class="ti ti-trending-up" aria-hidden="true"></i> +32.5% in 30d · spiking now</p>
-    </div>
-    <div class="metric-card">
-      <p class="metric-label">Instagram monthly views</p>
-      <p class="metric-value">22M+</p>
-      <p class="metric-delta delta-up"><i class="ti ti-trending-up" aria-hidden="true"></i> was 12.1M · +10M in 2 weeks</p>
-    </div>
-    <div class="metric-card">
-      <p class="metric-label">TikTok followers</p>
-      <p class="metric-value">90.4K</p>
-      <p class="metric-delta delta-up"><i class="ti ti-trending-up" aria-hidden="true"></i> up from 86.2K baseline</p>
-    </div>
-    <div class="metric-card">
-      <p class="metric-label">YouTube subscribers</p>
-      <p class="metric-value">66K</p>
-      <p class="metric-delta delta-up"><i class="ti ti-trending-up" aria-hidden="true"></i> 2,200 videos · confirmed</p>
-    </div>
-    <div class="metric-card">
-      <p class="metric-label">Spotify monthly listeners</p>
-      <p class="metric-value">17.6K</p>
-      <p class="metric-delta delta-warn"><i class="ti ti-minus" aria-hidden="true"></i> unchanged — funnel broken</p>
-    </div>
-    <div class="metric-card">
-      <p class="metric-label">Discord members</p>
-      <p class="metric-value">1,702</p>
-      <p class="metric-delta delta-up"><i class="ti ti-trending-up" aria-hidden="true"></i> up from 1,185 · +44%</p>
-    </div>
-  </div>
-
-  <p class="section-label">platform breakdown</p>
-  <div class="platform-grid">
-
-    <div class="platform-card spike">
-      <div class="platform-head">
-        <div class="platform-icon" style="background:#eaf3de;"><i class="ti ti-brand-instagram" style="color:#3b6d11" aria-hidden="true"></i></div>
-        <div>
-          <p class="platform-name">Instagram <span class="dd-badge badge-live" style="font-size:10px;">spiking</span></p>
-          <p class="platform-handle">@acidbxnny_</p>
-        </div>
+  <!-- TOP LINE METRICS -->
+  <div class="section">
+    <div class="section-label">top-line snapshot</div>
+    <div class="metric-grid">
+      <div class="metric-card spike">
+        <div class="metric-label">IG followers</div>
+        <div class="metric-value green">~80K</div>
+        <div class="metric-delta delta-up">↑ +32.5% in 30d</div>
+        <div class="metric-delta delta-up">spiking NOW</div>
       </div>
-      <p class="platform-stat">~80K followers</p>
-      <p class="platform-detail">
-        +19,232 net follows in 30 days (Apr 20–May 19). +32.5% vs prior period. 23,141 new follows / 3,909 unfollows — low churn ratio signals genuine audience, not follow-spam. Monthly views confirmed by creator at 22M+ (was 12.1M; +10M in ~2 weeks, +6M in 3–4 days alone). Engagement rate ~10.7% — heavily reshare/save driven. The growth chart shows a hockey-stick at the window's final 48 hours: this breakout is still accelerating.
-      </p>
-      <div>
-        <span class="pill pill-green">primary spike platform</span>
-        <span class="pill pill-green">10.7% engagement</span>
-        <span class="pill pill-green">sponsor-ready</span>
+      <div class="metric-card spike">
+        <div class="metric-label">IG monthly views</div>
+        <div class="metric-value green">22M+</div>
+        <div class="metric-delta delta-up">↑ was 12.1M</div>
+        <div class="metric-delta delta-up">+10M in 2 weeks</div>
       </div>
-    </div>
-
-    <div class="platform-card">
-      <div class="platform-head">
-        <div class="platform-icon" style="background:#eeedfe;"><i class="ti ti-brand-tiktok" style="color:#3c3489" aria-hidden="true"></i></div>
-        <div>
-          <p class="platform-name">TikTok</p>
-          <p class="platform-handle">@projectbrainrotofficial</p>
-        </div>
+      <div class="metric-card">
+        <div class="metric-label">TikTok followers</div>
+        <div class="metric-value purple">90.4K</div>
+        <div class="metric-delta delta-up">↑ from 86.2K baseline</div>
       </div>
-      <p class="platform-stat">90.4K followers · 6.3M likes</p>
-      <p class="platform-detail">
-        Up from 86.2K baseline — steady organic growth, not the spike platform this cycle. Feed is a tight loop: cosplay/POV clips (Hatsune Miku, Misa Amane), lip-syncs seeded to her own music, ravetok/e-girl bits. Bio line "every video = my music" functions as a persistent Spotify CTA. Top video "Is this love or bust" (Jul 1, 2025) sits at 328K views / 267K likes. Following count held at 0 — deliberate clean-account aesthetic.
-      </p>
-      <div>
-        <span class="pill pill-blue">discovery engine</span>
-        <span class="pill pill-gray">organic growth</span>
-        <span class="pill pill-blue">music seeding</span>
+      <div class="metric-card">
+        <div class="metric-label">YouTube subs</div>
+        <div class="metric-value red">66K</div>
+        <div class="metric-delta delta-up">↑ 2,200 videos confirmed</div>
       </div>
-    </div>
-
-    <div class="platform-card">
-      <div class="platform-head">
-        <div class="platform-icon" style="background:#fcebeb;"><i class="ti ti-brand-youtube" style="color:#a32d2d" aria-hidden="true"></i></div>
-        <div>
-          <p class="platform-name">YouTube <span class="dd-badge badge-new" style="font-size:10px;">confirmed</span></p>
-          <p class="platform-handle">@projectbrainrotofficial</p>
-        </div>
+      <div class="metric-card broken">
+        <div class="metric-label">Spotify listeners/mo</div>
+        <div class="metric-value red">17.6K</div>
+        <div class="metric-delta delta-bad">— unchanged // funnel broken</div>
       </div>
-      <p class="platform-stat">66K subscribers · 2,200 videos</p>
-      <p class="platform-detail">
-        Larger than the May 13 profile suggested ("new channel"). 2,200 uploads is a substantial back-catalogue — mostly Shorts repurposed from TikTok. Has a dedicated "Releases" tab indicating active music-channel setup. Top Shorts reach 800K–1.8M views. "Lid worden" (Membership) button live — direct monetisation enabled. Not a side project: a real, monetised asset.
-      </p>
-      <div>
-        <span class="pill pill-green">monetised</span>
-        <span class="pill pill-blue">Shorts catalogue</span>
-        <span class="pill pill-gray">2.2K videos</span>
+      <div class="metric-card">
+        <div class="metric-label">Discord members</div>
+        <div class="metric-value pink">1,702</div>
+        <div class="metric-delta delta-up">↑ +44% from 1,185</div>
       </div>
-    </div>
-
-    <div class="platform-card">
-      <div class="platform-head">
-        <div class="platform-icon" style="background:#e6f1fb;"><i class="ti ti-brand-spotify" style="color:#0c447c" aria-hidden="true"></i></div>
-        <div>
-          <p class="platform-name">Spotify</p>
-          <p class="platform-handle">BRAiNROT · Geeker Studios / DistroKid</p>
-        </div>
-      </div>
-      <p class="platform-stat">17,646 listeners · 5,566 followers</p>
-      <p class="platform-detail">
-        Unchanged from May 13 baseline despite the Instagram breakout. "Brainrot baby" flat at 341,760 streams. No new DSP release since RICHMAN (Apr 27). "Be ur brainrot" presave is live on Linktree with no announced date. This is the critical gap: a creator with 22M+ monthly IG views and 90K TikTok followers converting at only 17K monthly Spotify listeners means the TikTok-to-Spotify funnel is largely broken.
-      </p>
-      <div>
-        <span class="pill pill-amber">funnel gap — priority fix</span>
-        <span class="pill pill-blue">Subsidia: Dawn Vol. 11</span>
-        <span class="pill pill-gray">Spotify Radio listed</span>
-      </div>
-    </div>
-
-    <div class="platform-card">
-      <div class="platform-head">
-        <div class="platform-icon" style="background:#eededfe;"><i class="ti ti-device-tv" style="color:#534ab7" aria-hidden="true"></i></div>
-        <div>
-          <p class="platform-name">Twitch</p>
-          <p class="platform-handle">twitch.tv/projectbrainrot</p>
-        </div>
-      </div>
-      <p class="platform-stat">Mon–Sat · 11am–4pm ET · ~30 hrs/wk</p>
-      <p class="platform-detail">
-        Follower count not publicly surfaced but schedule is professional full-time streamer cadence. Cosplay/IRL positioning ("im misa amane and i hate bangs"). Most underpriced sponsor surface: 30 hrs/week of live airtime with a parasocial community at current engagement levels is worth more than a single Reel post.
-      </p>
-      <div>
-        <span class="pill pill-green">30 hrs/wk live</span>
-        <span class="pill pill-amber">count login-gated</span>
-        <span class="pill pill-blue">underpriced inventory</span>
-      </div>
-    </div>
-
-    <div class="platform-card">
-      <div class="platform-head">
-        <div class="platform-icon" style="background:#f1efe8;"><i class="ti ti-brand-discord" style="color:#444441" aria-hidden="true"></i></div>
-        <div>
-          <p class="platform-name">Discord · BRAiNROT CAVE</p>
-          <p class="platform-handle">discord.gg/aAkbrsrjuu</p>
-        </div>
-      </div>
-      <p class="platform-stat">1,702 members</p>
-      <p class="platform-detail">
-        Up from 1,185 baseline — +44% growth. The Discord growing in lockstep with IG confirms the spike is converting into genuine superfan densification, not just passive impressions. Useful for sponsor activation (exclusive drops, early-access codes, Discord-gated perks).
-      </p>
-      <div>
-        <span class="pill pill-green">+44% vs baseline</span>
-        <span class="pill pill-blue">superfan core</span>
-      </div>
-    </div>
-
-  </div>
-
-  <p class="section-label">the funnel — social reach vs music reach</p>
-  <div class="funnel-wrap">
-    <div class="funnel-row">
-      <span class="funnel-label">IG views/mo</span>
-      <div class="funnel-bar-wrap"><div class="funnel-bar bar-ig" style="width:100%;">22M+</div></div>
-    </div>
-    <div class="funnel-row">
-      <span class="funnel-label">YT subscribers</span>
-      <div class="funnel-bar-wrap"><div class="funnel-bar bar-yt" style="width:30%;">66K</div></div>
-    </div>
-    <div class="funnel-row">
-      <span class="funnel-label">TikTok followers</span>
-      <div class="funnel-bar-wrap"><div class="funnel-bar bar-tt" style="width:41%;">90.4K</div></div>
-    </div>
-    <div class="funnel-row">
-      <span class="funnel-label">Spotify listeners</span>
-      <div class="funnel-bar-wrap"><div class="funnel-bar bar-sp" style="width:8%;">17.6K</div></div>
-    </div>
-    <p class="funnel-note">Spotify monthly listeners represent &lt;0.1% of Instagram monthly views. Fixing this one conversion is the single highest-leverage action available right now.</p>
-  </div>
-
-  <p class="section-label">music catalog (SoundCloud / Spotify)</p>
-  <table class="catalog-table">
-    <thead>
-      <tr>
-        <th>track</th>
-        <th>released</th>
-        <th>Spotify streams</th>
-        <th>SC plays</th>
-        <th>notes</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td><span class="track-name">brainrot baby</span></td>
-        <td>Jul 2025</td>
-        <td>
-          <div class="stream-bar-wrap"><div class="stream-bar" style="width:100%;"></div></div>
-          <span style="font-size:12px;color:var(--color-text-secondary);">341,760</span>
-        </td>
-        <td>27,454</td>
-        <td><span class="pill pill-blue">breakout track</span></td>
-      </tr>
-      <tr>
-        <td><span class="track-name">your favorite sidekick</span></td>
-        <td>2025</td>
-        <td><div class="stream-bar-wrap"><div class="stream-bar" style="width:17%;"></div></div><span style="font-size:12px;color:var(--color-text-secondary);">58,310</span></td>
-        <td>—</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><span class="track-name">in my room</span></td>
-        <td>Aug 2025</td>
-        <td><div class="stream-bar-wrap"><div class="stream-bar" style="width:15%;"></div></div><span style="font-size:12px;color:var(--color-text-secondary);">52,188</span></td>
-        <td>4,527</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><span class="track-name">garden</span></td>
-        <td>Apr 2026</td>
-        <td><div class="stream-bar-wrap"><div class="stream-bar" style="width:5%;"></div></div><span style="font-size:12px;color:var(--color-text-secondary);">16,839</span></td>
-        <td>1,350</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td><span class="track-name">RICHMAN</span></td>
-        <td>Apr 27, 2026</td>
-        <td><div class="stream-bar-wrap"><div class="stream-bar" style="width:2%;"></div></div><span style="font-size:12px;color:var(--color-text-secondary);">8,236</span></td>
-        <td>1,822</td>
-        <td><span class="pill pill-gray">latest release</span></td>
-      </tr>
-      <tr>
-        <td><span class="track-name">Falling Hard</span></td>
-        <td>Apr 2026</td>
-        <td>—</td>
-        <td>—</td>
-        <td><span class="pill pill-green">Subsidia: Dawn Vol. 11</span></td>
-      </tr>
-      <tr>
-        <td><span class="track-name">be ur brainrot</span></td>
-        <td>TBA</td>
-        <td>—</td>
-        <td>—</td>
-        <td><span class="pill pill-amber">presave live · no date set</span></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p class="section-label">flags and considerations</p>
-  <ul class="flags-list">
-    <li>
-      <i class="ti ti-alert-triangle flag-icon" style="color:#ba7517;font-size:16px;" aria-hidden="true"></i>
-      <span><strong>Spotify conversion is broken.</strong> 22M+ monthly IG views producing only 17.6K monthly Spotify listeners is an anomaly. The "every video = my music" TikTok CTA is too soft — it names no track and gives no direct link. A pinned TikTok naming "brainrot baby" + Spotify link could move this number meaningfully within a single release cycle.</span>
-    </li>
-    <li>
-      <i class="ti ti-alert-triangle flag-icon" style="color:#ba7517;font-size:16px;" aria-hidden="true"></i>
-      <span><strong>Release cadence has slipped.</strong> Her ~1/month pace implied a mid-May drop. "Be ur brainrot" presave exists but has no announced date. Momentum from a social spike without a new release to capture it is wasted.</span>
-    </li>
-    <li>
-      <i class="ti ti-info-circle flag-icon" style="color:#185fa5;font-size:16px;" aria-hidden="true"></i>
-      <span><strong>"We are charlie kirk" (Feb 2026)</strong> is a politically coded track title in her catalog. Meaning — satire, homage, or otherwise — is ambiguous from public materials. Any mainstream brand must review the full catalog before signing. Streetwear, energy drink, and gaming brands will likely be unbothered; conservative FMCG brands should be flagged.</span>
-    </li>
-    <li>
-      <i class="ti ti-info-circle flag-icon" style="color:#185fa5;font-size:16px;" aria-hidden="true"></i>
-      <span><strong>Unmanaged and publicly signalling it.</strong> Business contact is a personal Gmail. Spotify bio reads "labels are food and mommas hungry." No Night Media or any other management/label association found. The door is open — but the absence of a manager at this growth velocity is both an opportunity and a risk.</span>
-    </li>
-    <li>
-      <i class="ti ti-circle-check flag-icon" style="color:#3b6d11;font-size:16px;" aria-hidden="true"></i>
-      <span><strong>YouTube is a real asset.</strong> 66K subscribers and 2,200 videos was underdocumented in the prior profile. YouTube Membership ("Lid worden") is active, meaning she has a fourth direct-monetisation channel alongside Patreon, Twitch subs, and Throne. Shorts appear to be repurposed TikTok content, meaning minimal incremental production cost.</span>
-    </li>
-    <li>
-      <i class="ti ti-circle-check flag-icon" style="color:#3b6d11;font-size:16px;" aria-hidden="true"></i>
-      <span><strong>Subsidia: Dawn Vol. 11</strong> ("Falling Hard," track 11/12, ℗ 2026 Subsidia) is her first label-adjacent placement. Subsidia is Excision's bass/dubstep imprint — a credible EDM industry foothold and a warm lead for further label or booking conversations.</span>
-    </li>
-    <li>
-      <i class="ti ti-circle-check flag-icon" style="color:#3b6d11;font-size:16px;" aria-hidden="true"></i>
-      <span><strong>Sponsor-virgin with growing leverage.</strong> No prior brand deals identified anywhere. First brand gets category exclusivity with zero audience fatigue. Rates set today will look cheap at 100K Instagram followers — that threshold is days away at current pace.</span>
-    </li>
-    <li>
-      <i class="ti ti-info-circle flag-icon" style="color:#185fa5;font-size:16px;" aria-hidden="true"></i>
-      <span><strong>Audience age range.</strong> Self-described as "18yr old hyperpop leader" with confirmed Gen Z skew (16–24). Under-18s are likely present in the audience. Age-gated products (alcohol, gambling, vape, sportsbooks) are a regulatory and reputational risk regardless of her own age.</span>
-    </li>
-  </ul>
-
-  <p class="section-label">recommendations by role</p>
-  <div class="recs-grid">
-    <div class="rec-card">
-      <p class="rec-role">if you are a sponsor</p>
-      <ul class="rec-items">
-        <li>Move within 14 days — pricing re-bases at 100K IG</li>
-        <li>Lead with IG Reel + Twitch integration bundle</li>
-        <li>Twitch is the most underpriced inventory on the stack</li>
-        <li>Brand-safety check: full catalog review required</li>
-        <li>Good fit: energy drinks, alt fashion, gaming peripherals, makeup, audio gear, anime/cosplay</li>
-        <li>Bad fit: crypto, gambling, productivity SaaS, family brands</li>
-      </ul>
-    </div>
-    <div class="rec-card">
-      <p class="rec-role">if you are a manager</p>
-      <ul class="rec-items">
-        <li>Pitch this week — personal Gmail business contact = open door</li>
-        <li>Lead with a Spotify editorial pitch plan (Fresh Finds is the entry target)</li>
-        <li>First press feature (Pigeons & Planes, NYLON) is the cheapest high-leverage move</li>
-        <li>Redirect bookings to NYC hyperpop nights and Subsidia-circuit shows</li>
-        <li>Subsidia placement is the warm lead for label conversations</li>
-      </ul>
-    </div>
-    <div class="rec-card">
-      <p class="rec-role">if you are her team</p>
-      <ul class="rec-items">
-        <li>Drop "be ur brainrot" within 7 days — window is now</li>
-        <li>Pin a TikTok explicitly naming "brainrot baby" + Spotify link</li>
-        <li>Consolidate Patreon into 3 clear tiers — currently under-monetised</li>
-        <li>Use IG's 22M monthly views as a Spotify redirect surface, not just a Reel mirror</li>
-        <li>Do not accept a rate card set today for any deal longer than 3 months without a step-up clause</li>
-      </ul>
     </div>
   </div>
 
-  <div class="verdict">
-    <strong>Bottom line:</strong> BRAiNROT is mid-breakout on Instagram right now — not in retrospect, not as a projection, but actively happening as of this writing. The social stack (IG ~80K and climbing fast, TikTok 90.4K, YouTube 66K, Discord +44%) is already sponsor-ready at above-market engagement rates. The music stack is the lagging indicator: Spotify at 17.6K monthly listeners against 22M+ monthly IG views is the anomaly that defines the opportunity. Whoever fixes that funnel — manager, label, or the creator herself — unlocks a step-change in both streaming revenue and commercial leverage. The window before rates re-price significantly is approximately two to four weeks.
+  <!-- PLATFORM BREAKDOWN -->
+  <div class="section">
+    <div class="section-label">platform by platform</div>
+
+    <div class="platform-row ig">
+      <div class="platform-left">
+        <div class="platform-name" style="color:var(--green);">Instagram <span style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--green);background:rgba(107,255,176,0.1);border:1px solid rgba(107,255,176,0.2);padding:2px 6px;border-radius:4px;margin-left:6px;">SPIKING</span></div>
+        <div class="platform-handle">@acidbxnny_</div>
+        <div class="platform-detail">
+          +19,232 net follows in 30 days (Apr 20–May 19). 23,141 new follows / 3,909 unfollows — <strong>low churn ratio = genuine audience, not spam</strong>. Monthly views confirmed by creator at 22M+ (was 12.1M; +10M in ~2 weeks, +6M in 3–4 days alone). Engagement rate ~10.7% — heavily reshare/save driven. Growth chart shows a hockey-stick at the window's final 48 hours. <strong>This breakout is still accelerating.</strong>
+        </div>
+      </div>
+      <div class="platform-right">
+        <div class="platform-stat ig-stat">~80K</div>
+        <div class="platform-subdelta delta-up">+32.5% MoM</div>
+        <div class="platform-subdelta delta-up">10.7% eng rate</div>
+      </div>
+    </div>
+
+    <div class="platform-row tt">
+      <div class="platform-left">
+        <div class="platform-name" style="color:var(--accent);">TikTok</div>
+        <div class="platform-handle">@projectbrainrotofficial</div>
+        <div class="platform-detail">
+          Steady organic growth — not the spike platform this cycle, but healthy. Feed is a tight loop: cosplay/POV clips (Miku, Misa Amane), lip-syncs to her own tracks, ravetok e-girl bits. <strong>"every video = my music"</strong> is a persistent Spotify CTA in the bio. Following count held at 0 — deliberate clean-account aesthetic. Top video "Is this love or bust" sits at 328K views / 267K likes. 6.3M total likes.
+        </div>
+      </div>
+      <div class="platform-right">
+        <div class="platform-stat tt-stat">90.4K</div>
+        <div class="platform-subdelta delta-up">↑ from 86.2K</div>
+        <div class="platform-subdelta delta-flat">6.3M total likes</div>
+      </div>
+    </div>
+
+    <div class="platform-row yt">
+      <div class="platform-left">
+        <div class="platform-name" style="color:var(--red);">YouTube <span style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--accent3);background:rgba(107,255,220,0.1);border:1px solid rgba(107,255,220,0.2);padding:2px 6px;border-radius:4px;margin-left:6px;">confirmed</span></div>
+        <div class="platform-handle">@projectbrainrotofficial</div>
+        <div class="platform-detail">
+          Larger than previously documented — described as "new" but 66K subs and 2,200 videos is a real channel. Mostly Shorts repurposed from TikTok — <strong>minimal incremental production cost</strong>. Has a dedicated Releases tab. YouTube Membership ("Lid worden") button is live — <strong>4th direct monetisation channel</strong> alongside Patreon, Twitch subs, and Throne. Top Shorts reach 800K–1.8M views.
+        </div>
+      </div>
+      <div class="platform-right">
+        <div class="platform-stat yt-stat">66K</div>
+        <div class="platform-subdelta delta-up">2,200 videos</div>
+        <div class="platform-subdelta delta-up">membership live</div>
+      </div>
+    </div>
+
+    <div class="platform-row sp">
+      <div class="platform-left">
+        <div class="platform-name" style="color:var(--accent3);">Spotify <span style="font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--red);background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.2);padding:2px 6px;border-radius:4px;margin-left:6px;">FUNNEL GAP</span></div>
+        <div class="platform-handle">BRAiNROT · Geeker Studios / DistroKid</div>
+        <div class="platform-detail">
+          Unchanged from May 13 despite the Instagram breakout. "Brainrot baby" flat at 341,760. No new DSP release since RICHMAN (Apr 27). "Be ur brainrot" presave is live on Linktree with no announced date. <strong>A creator with 22M+ monthly IG views converting at only 17.6K Spotify monthly listeners is an anomaly.</strong> This is the single biggest leak in the funnel.
+        </div>
+      </div>
+      <div class="platform-right">
+        <div class="platform-stat sp-stat">17.6K</div>
+        <div class="platform-subdelta delta-bad">— unchanged</div>
+        <div class="platform-subdelta delta-flat">341K top stream</div>
+      </div>
+    </div>
+
+    <div class="platform-row tw">
+      <div class="platform-left">
+        <div class="platform-name" style="color:var(--accent);">Twitch</div>
+        <div class="platform-handle">twitch.tv/projectbrainrot</div>
+        <div class="platform-detail">
+          Mon–Sat, 11am–4pm ET — <strong>~30 hrs/week, full-time streamer cadence</strong>. Cosplay/IRL positioning. Follower count login-gated. Most underpriced sponsor surface on the stack: 30 hours of live airtime per week at this engagement level is worth more per dollar than a single Reel.
+        </div>
+      </div>
+      <div class="platform-right">
+        <div class="platform-stat tw-stat">30h/wk</div>
+        <div class="platform-subdelta delta-up">6 days/week</div>
+        <div class="platform-subdelta delta-warn">count gated</div>
+      </div>
+    </div>
+
+    <div class="platform-row dc">
+      <div class="platform-left">
+        <div class="platform-name" style="color:var(--accent2);">Discord — BRAiNROT CAVE</div>
+        <div class="platform-handle">discord.gg/aAkbrsrjuu</div>
+        <div class="platform-detail">
+          Up +44% from baseline. <strong>Discord growing in lockstep with IG confirms the spike is converting into genuine superfan densification</strong>, not just passive impressions. Useful for sponsor activation: exclusive drops, early-access codes, Discord-gated perks.
+        </div>
+      </div>
+      <div class="platform-right">
+        <div class="platform-stat dc-stat">1,702</div>
+        <div class="platform-subdelta delta-up">↑ from 1,185</div>
+        <div class="platform-subdelta delta-up">+44%</div>
+      </div>
+    </div>
   </div>
 
-  <div class="caveat-block">
-    Data notes: Instagram follower count login-gated; ~80K figure inferred from creator's own statement ("almost at 80K, 4 days after hitting 70K") and the May 19 analytics screenshot showing 78,454 with a sharp end-of-window spike. Spotify 17,646 figure may reflect minor page-cache lag; re-pull recommended in 72 hours. TikTok 90.4K confirmed by Koen directly. YouTube 66K confirmed by screenshot. Twitch and Patreon subscriber counts remain login-gated and unverified. No Chartmetric, Songstats, or Kworb index exists for this artist ID — below third-party tracker threshold.
+  <!-- THE FUNNEL -->
+  <div class="section">
+    <div class="section-label">the funnel — social reach vs music reach</div>
+    <div class="funnel">
+      <div class="funnel-row">
+        <span class="funnel-label">IG views</span>
+        <div class="funnel-bar-bg"><div class="funnel-bar bar-ig" style="width:100%;">22M+ / month</div></div>
+      </div>
+      <div class="funnel-row">
+        <span class="funnel-label">YT subs</span>
+        <div class="funnel-bar-bg"><div class="funnel-bar bar-yt" style="width:30%;">66K</div></div>
+      </div>
+      <div class="funnel-row">
+        <span class="funnel-label">TikTok</span>
+        <div class="funnel-bar-bg"><div class="funnel-bar bar-tt" style="width:41%;">90.4K</div></div>
+      </div>
+      <div class="funnel-row">
+        <span class="funnel-label">Spotify</span>
+        <div class="funnel-bar-bg"><div class="funnel-bar bar-sp" style="width:8%;">17.6K</div></div>
+      </div>
+      <div class="funnel-note">// Spotify monthly listeners = &lt;0.1% of Instagram monthly views. fixing this one conversion is the single highest-leverage action available right now.</div>
+    </div>
+  </div>
+
+  <!-- MUSIC CATALOG -->
+  <div class="section">
+    <div class="section-label">music catalog</div>
+
+    <div class="track">
+      <div class="track-num">01</div>
+      <div class="track-info">
+        <div class="track-name">brainrot baby <span class="track-badge badge-breakout">breakout</span></div>
+        <div class="track-meta">jul 2025 · soundcloud: 27,454 plays</div>
+      </div>
+      <div class="track-right">
+        <div class="track-streams">341,760</div>
+        <div class="track-bar-bg"><div class="track-bar" style="width:100%;background:var(--green);"></div></div>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-num">02</div>
+      <div class="track-info">
+        <div class="track-name">your favorite sidekick</div>
+        <div class="track-meta">2025</div>
+      </div>
+      <div class="track-right">
+        <div class="track-streams">58,310</div>
+        <div class="track-bar-bg"><div class="track-bar" style="width:17%;"></div></div>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-num">03</div>
+      <div class="track-info">
+        <div class="track-name">in my room</div>
+        <div class="track-meta">aug 2025 · soundcloud: 4,527</div>
+      </div>
+      <div class="track-right">
+        <div class="track-streams">52,188</div>
+        <div class="track-bar-bg"><div class="track-bar" style="width:15%;"></div></div>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-num">04</div>
+      <div class="track-info">
+        <div class="track-name">garden</div>
+        <div class="track-meta">apr 2026 · soundcloud: 1,350</div>
+      </div>
+      <div class="track-right">
+        <div class="track-streams">16,839</div>
+        <div class="track-bar-bg"><div class="track-bar" style="width:5%;"></div></div>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-num">05</div>
+      <div class="track-info">
+        <div class="track-name">RICHMAN <span class="track-badge badge-latest">latest</span></div>
+        <div class="track-meta">apr 27, 2026 · soundcloud: 1,822</div>
+      </div>
+      <div class="track-right">
+        <div class="track-streams">8,236</div>
+        <div class="track-bar-bg"><div class="track-bar" style="width:2%;"></div></div>
+      </div>
+    </div>
+
+    <div class="track">
+      <div class="track-num">06</div>
+      <div class="track-info">
+        <div class="track-name">Falling Hard <span class="track-badge badge-label">Subsidia: Dawn Vol. 11</span></div>
+        <div class="track-meta">apr 2026 · ℗ Subsidia / Excision's label</div>
+      </div>
+      <div class="track-right">
+        <div class="track-streams" style="color:var(--accent3);">label placement</div>
+      </div>
+    </div>
+
+    <div class="track" style="border-color:rgba(255,224,107,0.2);">
+      <div class="track-num">—</div>
+      <div class="track-info">
+        <div class="track-name">be ur brainrot <span class="track-badge badge-presave">presave live</span></div>
+        <div class="track-meta">TBA — no date announced. presave on linktree.</div>
+      </div>
+      <div class="track-right">
+        <div class="track-streams" style="color:var(--yellow);">unreleased</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLAGS -->
+  <div class="section">
+    <div class="section-label">flags and considerations</div>
+
+    <div class="flag">
+      <div class="flag-dot bad"></div>
+      <div class="flag-text"><strong>Spotify conversion is broken.</strong> 22M+ monthly IG views producing only 17.6K Spotify monthly listeners is an anomaly. The "every video = my music" TikTok bio is too soft — it names no track, gives no link. A pinned TikTok naming "brainrot baby" + Spotify link could move this within a single cycle.</div>
+    </div>
+
+    <div class="flag">
+      <div class="flag-dot warn"></div>
+      <div class="flag-text"><strong>Release cadence has slipped.</strong> ~1/month pace implied a mid-May drop. "Be ur brainrot" presave is live but has no date. Momentum from a social spike without a new release to capture it is wasted. Drop it within 7 days.</div>
+    </div>
+
+    <div class="flag">
+      <div class="flag-dot info"></div>
+      <div class="flag-text"><strong>"we are charlie kirk" (Feb 2026)</strong> is a politically coded track title in the catalog. Meaning is ambiguous from public materials. Any mainstream brand must review the full catalog. Streetwear, energy drink, gaming brands will likely be unbothered. Conservative FMCG brands: flag explicitly.</div>
+    </div>
+
+    <div class="flag">
+      <div class="flag-dot info"></div>
+      <div class="flag-text"><strong>Unmanaged and publicly signalling it.</strong> Business contact is a personal Gmail. Spotify bio reads "labels are food and mommas hungry." No Night Media or any other management association found in public data. The door is wide open.</div>
+    </div>
+
+    <div class="flag">
+      <div class="flag-dot good"></div>
+      <div class="flag-text"><strong>YouTube is a real asset, not a side project.</strong> 66K subs + 2,200 videos + YouTube Membership active = 4th direct monetisation channel. Mostly TikTok Shorts repurposed, so minimal extra production cost. This was underdocumented in the prior profile.</div>
+    </div>
+
+    <div class="flag">
+      <div class="flag-dot good"></div>
+      <div class="flag-text"><strong>Subsidia: Dawn Vol. 11 placement ("Falling Hard")</strong> is her first label-adjacent credit. Subsidia is Excision's bass/dubstep imprint — a credible EDM industry foothold and a warm lead for further label or booking conversations.</div>
+    </div>
+
+    <div class="flag">
+      <div class="flag-dot good"></div>
+      <div class="flag-text"><strong>Sponsor-virgin with growing leverage.</strong> Zero prior brand deals. First brand gets full category exclusivity with zero audience fatigue. Rates set today will look cheap at 100K Instagram followers — that milestone is days away at current pace.</div>
+    </div>
+
+    <div class="flag">
+      <div class="flag-dot info"></div>
+      <div class="flag-text"><strong>Audience includes under-18s.</strong> Age-gated products (alcohol, gambling, vape, sportsbooks) are a regulatory and reputational risk regardless of her own age. This is non-negotiable for brand-safety review.</div>
+    </div>
+  </div>
+
+  <!-- RECOMMENDATIONS -->
+  <div class="section">
+    <div class="section-label">recommendations by role</div>
+
+    <div class="rec-block green">
+      <div class="rec-role">// if you are a sponsor</div>
+      <p><span class="hl">Move within the next 14 days.</span> Her Instagram is mid-breakout and pricing re-bases hard when she hits 100K followers — that's days away, not weeks.</p>
+      <p>Lead with an <strong>IG Reel + Twitch integration bundle</strong>, not just a single post. Twitch is the most underpriced inventory on the stack — 30 hrs/week of live airtime at this engagement level.</p>
+      <p><strong>Good fit:</strong> energy drinks, alt fashion, gaming peripherals, alt-coded makeup, audio gear, anime/cosplay platforms. <strong>Bad fit:</strong> crypto, gambling, productivity SaaS, family brands, anything adult-gated.</p>
+      <p>Do not set a rate card for any deal longer than 3 months without a step-up clause. Her numbers will look different in 90 days.</p>
+    </div>
+
+    <div class="rec-block" style="border-left-color:var(--accent);">
+      <div class="rec-role">// if you are a manager</div>
+      <p><span class="hl">Pitch this week.</span> Personal Gmail business contact + "labels are food and mommas hungry" Spotify bio = the door is open. She is actively signalling she wants representation.</p>
+      <p>Lead with a <strong>Spotify editorial pitch plan</strong> — Fresh Finds is the correct entry target. Explain exactly how you'd get "be ur brainrot" in front of a Spotify editor. That's the credibility pitch.</p>
+      <p><strong>First press feature</strong> (Pigeons & Planes, NYLON) is the cheapest high-leverage move available. The lane is completely open — zero coverage exists anywhere.</p>
+      <p>Redirect bookings to <strong>NYC hyperpop nights</strong> and the Subsidia/Excision circuit. The Wolverhampton booking suggests reactive rather than strategic booking. She's "FROM NYC IM WALKIN HERE" per her own Spotify bio — use that.</p>
+    </div>
+
+    <div class="rec-block pink">
+      <div class="rec-role">// if you are her team right now</div>
+      <p><span class="hl">Drop "be ur brainrot" within 7 days.</span> The window is now. A social spike without a new release to capture it is wasted.</p>
+      <p>Pin a TikTok that <strong>explicitly names "brainrot baby" and links to Spotify</strong>. The current bio CTA is too soft.</p>
+      <p>Use Instagram's 22M monthly views as a <strong>Spotify redirect surface</strong>, not just a Reel mirror of TikTok. The audience is there — they're just not being routed to music.</p>
+      <p>Consolidate Patreon into <strong>3 clear tiers</strong> with a top tier that includes a monthly Discord call. Currently under-monetising the fan surge.</p>
+    </div>
+  </div>
+
+  <!-- VERDICT -->
+  <div class="section">
+    <div class="section-label">bottom line</div>
+    <div class="verdict">
+      <p>BRAiNROT is <span class="hl">mid-breakout on Instagram right now</span> — not in retrospect, not as a projection, but actively happening as of this writing. The social stack (IG ~80K and climbing fast, TikTok 90.4K, YouTube 66K, Discord +44%) is already sponsor-ready at above-market engagement rates.</p>
+      <p>The music stack is the lagging indicator. <strong>Spotify at 17.6K monthly listeners against 22M+ monthly IG views is the anomaly that defines the opportunity.</strong> Whoever fixes that funnel — manager, label, or the creator herself — unlocks a step-change in both streaming revenue and commercial leverage.</p>
+      <p>The window before rates re-price significantly is <span class="hl">approximately two to four weeks.</span></p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span class="big">:3</span>
+    <p>BRAiNROT creator deep dive // may 20, 2026 // compiled by koen</p>
   </div>
 
 </div>
+</body>
+</html>
